@@ -1,0 +1,86 @@
+body {
+	background-image : url("../images/bg.png");
+	background-repeat : repeat-x;
+	background-position : top center;
+	background-color : white;
+	
+	margin : 0;
+	padding : 0;
+	
+	text-align : center;
+	
+	font-family : FreeSans, "Myriad Pro", Tahoma, Arial, Sans;
+	font-size : 10pt;
+	line-height : 140%;
+	color : black;
+}
+
+h1#logo {
+	background-image : url("../images/title.png");
+	background-repeat : no-repeat;
+	background-position : top center;
+	
+	font-size : 0;
+	
+	display : block;
+	
+	margin : 0;
+	padding : 0;
+	
+	width : 798px;
+	height : 89px;
+	
+	margin-top : 46px;
+	margin-left : auto;
+	margin-right : auto;
+}
+
+div#subtitle {
+	font-size : 14pt;
+	color : #555753;
+	margin-top : 43px;
+}
+
+div#subtitle strong {
+	font-weight : 700;
+	color : #4e9a06;
+}
+
+div#content, div#subtitle {
+	width : 720px;
+	
+	margin-left : auto;
+	margin-right : auto;
+	
+	text-align : justify;
+}
+
+h1, h2, h3, h4, h5, h6, div#subtitle {
+	font-family : "Open Sans", Sans;
+	font-weight : normal;
+}
+
+h2 {
+	font-size : 14pt;
+	color : #73d216;
+	margin-top : 43px;
+}
+
+a {
+	color : #4e9a06;
+	text-decoration : none;
+}
+
+a:hover {
+	text-decoration : underline;
+}
+
+.figure {
+
+}
+
+.right {
+	float : right;
+	margin-left   : 15pt;
+	margin-bottom : 15pt;
+}
