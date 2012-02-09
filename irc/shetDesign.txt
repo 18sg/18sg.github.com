@@ -1,0 +1,807 @@
+Conversation with #uhc at Fri 23 Apr 2010 16:41:13 BST on heathcj9@irc.quakenet.org (irc)
+(16:57:44) tomn [~user@lf027.cs.man.ac.uk] entered the room.
+(16:57:54) tomn: hello :)
+(16:58:03) j616s: hey ^-^
+(17:00:01) tomn: heathcj9: got your texts, but didn'treply because i was...doing work... obviously :p
+(17:00:26) tomn: where did you find those switch things? i wants them :p
+(17:03:34) Jonathan: apparently maplin sell em cheap but there is a place in the arndale centre which does them cheap
+(17:03:38) Jonathan: our tutor had one
+(17:03:45) Jonathan: so hackable it would be amazing :D
+(17:03:49) Jonathan: oh and see misc
+(17:04:10) Jonathan: the fuse API is "the_sechs" as I've known people to say :s
+(17:04:19) Jonathan: it is actually really, really nice
+(17:04:55) j616s: switch thing?
+(17:05:22) Jonathan: no -- fuse, a user-space filesystem
+(17:05:45) j616s: I'm lost now :-P
+(17:07:01) Jonathan: its a thing that lets  you make your own virtual file systems in python
+(17:07:05) Jonathan: (in effect)
+(17:07:20) tomn: heathcj9: this page is full of win: http://www.clasohlson.co.uk/product/category.aspx?category=timers%2fswitches:remote+control+switches&id=88599173&_path=251882;85177594;88599170;88599173
+(17:07:34) Jonathan: lets put it this way:
+(17:07:34) Jonathan: watch cat /dev/house/kitchen/microwave
+(17:08:06) tomn: 3 pack of those switch things for £9.99
+(17:08:15) Jonathan: yep
+(17:08:18) j616s: oh. those switch things. 
+(17:08:19) Jonathan: and no doubt east-to-hack
+(17:08:25) ***j616s is no longer lost
+(17:08:56) tomn: i need to buy some. soon.
+(17:10:51) Jonathan: looks like my weekend will not be taken up by fuse
+(17:10:54) Jonathan: I'm basically done
+(17:11:21) tomn: really? awesomesauces
+(17:11:34) Jonathan: (though obv not handling certain things like permissions but still)
+(17:12:17) Jonathan: win -- I made a file with a newline in its filename
+(17:12:38) Jonathan: interesting fact: you can actually list the number of files in a dir but wc'ing ls because ls displays newlines as "?"
+(17:14:18) Jonathan: only bad thing really is that your script gets backgrounded
+(17:14:29) Jonathan: so you don't have any interactivity
+(17:14:37) Jonathan: that isn't much of a problem appart from debugging
+(17:17:35) tomn: hmm, you could redirect stdout and stdin to two fifos and cat into/out of it :p
+(17:17:35) j616s is now known as j616s|away
+(17:17:38) j616s|away is now known as j616s|foodage
+(17:18:50) Jonathan: :D
+(17:20:32) Jonathan: based on my last test, it handles exceptions silently
+(17:20:38) Jonathan: that will be a complete bastard to test
+(17:21:07) Jonathan: saying that, you could quite easly make a test script to simulate running the fs
+(17:21:21) tomn: yeah.
+(17:21:51) tomn: if it was me, i would make a decorator that handles exceptions from a function and writes them to a log file.
+(17:22:13) Jonathan: (or better, have a /log directory in your fs :p)
+(17:23:16) tomn: :D
+(17:23:52) Jonathan: btw how could we implement things like easily linking together events on our house fs in a nice way?
+(17:24:10) tomn: symlinks?
+(17:24:13) Jonathan: e.g. linking the event of a light being turned on with the turning off of another
+(17:25:10) Jonathan: (oh and what would you think about for where a file contains a binary value having a dot-file version of that file which contains the negation?)
+(17:26:53) tomn: maybe have some way of just making specific events run a shell script when fired?
+(17:27:30) Jonathan: right... so not something easy to do at the "fs" level?
+(17:27:49) Jonathan: tbh the fs stuff will probably be more for quick-hack scripts or cronjobs (e.g. lights on a 8am etc.)
+(17:28:21) tomn: like, each light or whatever gets a directory containing a status file, and an 'on', 'off', and 'change' cirectory, containg scripts to be run on those events.
+(17:28:38) Jonathan: hmm maybe
+(17:28:45) tomn: the problem is though, like you say, you can't really do that with fuse.
+(17:28:52) Jonathan: yeah
+(17:29:31) Jonathan: ah well -- we can do something jack-style couldn't we for control rules like the one I suggested above
+(17:29:49) tomn: i would keep the fuse bit for just reading/writing changes to files, and handle everthing else externally.
+(17:29:59) Jonathan: right ok
+(17:30:03) tomn: jack style?
+(17:30:32) Jonathan: as in you have sources and sockets and you can put a "wire" between the two linking an event with an action
+(17:30:52) Jonathan: (replace my words with jack jargon to taste)
+(17:31:27) tomn: (maybe... as well as having a house dir containing the statuses, have a house.d dir containing shell scripts to be executed on certain events.)
+(17:31:27) Jonathan: we could also do something beardbot style for modules so we just have a directory on the server you can just put your own scripts in and load them from some sort of console
+(17:32:27) tomn: (that way, you can just symlink scripts together to make them run on more than one event, perhaps passing event parameters as command line args?)
+(17:32:42) Jonathan: hmm...
+(17:33:20) Jonathan: aren't most of that sort of thing going to be much better handled by a module type system though? we don't need to expose *every* feature that way
+(17:33:38) tomn: you're probably right.
+(17:34:21) Jonathan: and I presume you're happy doing this thing in python :P :)
+(17:35:16) tomn: oh yeah :)
+(17:35:58) Jonathan: (scratch scratch, ruffle)
+(17:36:12) tomn: :D
+(17:36:28) tomn: need a beardbot plugin to say that :p
+(17:36:38) Jonathan: tomn: I'll let you do that :D
+(17:36:45) Jonathan: I took the last awesome one :D
+(17:37:10) tomn: lol :p
+(17:38:57) Jonathan: plus its your beard that inhabits this channel
+(17:39:33) Jonathan: if we carefully design our system well enough we could auto-generate a large ammount of the filesystem, commandline and IRC bot etc. :D
+(17:41:54) tomn: i've just changed my mind - there should be a 'server' (python, whatever), that listens on the network and does all the i2c stuff, and the fuse bit should just be a client.
+(17:42:44) tomn: ... beacuse you can't trigger inotify events from fuse, it would be imposible to have other programs interfacing with it properly.
+(17:43:01) Jonathan: aww :( no inotify?
+(17:43:02) tomn: ... and it allows easy module loading/unloading etc.
+(17:43:04) Jonathan: that's a bit of a bummer
+(17:43:48) tomn: yeah... you can triger an inotify event by writing to the file manually, but not, for example when a light changes state externally.
+(17:44:12) tomn: also, it'd be a mess to implment the watching bit, imho
+(17:45:04) Jonathan: so how would I make a quick script to see when something has finished in the microwave?
+(17:45:34) Jonathan: I've never done any RPC stuff, I presume that python has a way to basically allow you to access a class on a remote computer like a regular one?
+(17:45:45) Jonathan: because that would be the nicest way to do a server, no?
+(17:46:16) tomn: i say we still have a house.d dir with scripts to be executed, eg:
+(17:47:57) tomn: put "echo 'it's done' | mail -s 'dinner's ready' tom" in /house.d/kitchen/microwave/finnish/70-email_tom
+(17:48:39) Jonathan: hmm
+(17:48:57) tomn: (70 is just a random number, scripts are executed in order.)
+(17:49:01) Jonathan: would be cool but I wouldn't want that to be a work-around for not having super-easy server interaction
+(17:49:02) Jonathan: yeah
+(17:49:10) tomn: have both?
+(17:49:11) Jonathan: suprisingly, I know that
+(17:49:13) Jonathan: of course
+(17:50:21) tomn: housebot: watch kitchen/microwave   ?
+(17:50:47) Jonathan: or better do it inteligently:
+(17:50:47) Jonathan: housebot: watch microwave (as we don't have any others)
+(17:51:18) Jonathan: btw, as a point, because we're going to have things such as a camera in the hall, we're going to have things coming into the server which aren't part of the housenet i2c network so our server is basically going to be some sort of event bus isn't it?
+(17:51:21) tomn: of course :p
+(17:51:36) tomn: erm... i have to go.
+(17:51:44) Jonathan: lol, ok
+(17:51:52) Jonathan: enjoy that thing you have to go for then :)
+(17:51:56) Jonathan: ;)
+(17:52:07) tomn: i have to go home - i'm still in uni :p
+(17:52:13) Jonathan: ohhh right
+(17:52:15) Jonathan: lol
+(17:52:30) Jonathan: in which case I'm going to go down and get some tea
+(17:52:48) tomn: but yeah - everything has events, but some things also have states.
+(17:52:55) tomn: anyways, bye!
+(17:52:58) tomn left the room (quit: Read error: EOF from client).
+(18:07:11) j616s|foodage is now known as j616s
+(18:14:51) tomn [~user@students.ubs.vic.ask4.co.uk] entered the room.
+(18:27:18) j616s: http://thereifixedit.com/2010/04/23/epic-kludge-photo-joe-camel-has-to-make-ends-meet-somehow/
+(18:28:59) tomn: :)
+(18:43:27) j616s: right. I'm off. laters ^-^
+(18:43:30) j616s is now known as j616s|away
+(18:43:34) j616s|away is now known as j616s|cosplay
+(18:46:49) Jonathan: tomn: pyro looks good btw for the RPC stuff
+(18:51:53) tomn: ooh, fancy.
+(19:09:32) Jonathan: so yeah, that could be just a little bit lovely to use
+(19:10:06) Jonathan: one thing we do need to work out is going to be designing this as at least for this first stage our protocol is the design :D
+(19:11:18) matty3269 [~matthew@212.9.125.169] entered the room.
+(19:11:44) matty3269: Heeeeeeeeeeeeeeeey
+(19:11:55) Jonathan: http://jhnet.co.uk/misc/firstFS.png
+(19:13:06) matty3269: awww tomn's only 3 bytes :(
+(19:13:22) Jonathan: lol -- the file just contains its own name and nothing else :)
+(19:13:22) tomn: :(
+(19:13:46) Jonathan: I win at names :D
+(19:13:52) matty3269: haha
+(19:13:58) matty3269: and James
+(19:14:09) Jonathan: yeah
+(19:14:16) Jonathan: but of course, he doesn't win
+(19:14:20) tomn: have a guess whch color is me: http://tomn.up2.s3.amazonaws.com/sloc.png
+(19:14:48) Jonathan: I'm going to go with green
+(19:14:56) tomn: :p
+(19:15:09) ***matty3269 is going cosplay tonight.
+(19:15:16) Jonathan: matty3269: you're a retard
+(19:15:25) Jonathan: that or terminally ill
+(19:15:27) matty3269: I know
+(19:15:32) Jonathan: either way, I can't think of another reason to go
+(19:15:36) matty3269: I think I've got an illness
+(19:15:41) tomn: s/a retard/retired/
+(19:15:43) matty3269: why not go
+(19:15:56) Jonathan: umm.... I think james' behaviour today gives a good reason
+(19:15:58) Jonathan: plus its 4 quid
+(19:16:02) matty3269: yer
+(19:16:05) matty3269: that sucks
+(19:16:08) matty3269: but meh
+(19:16:16) Jonathan: (which reminds me, you missed the one good meal of the month --- some epic pie and chips)
+(19:16:30) matty3269: awwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww noooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+(19:16:57) Jonathan: beardbot: did matty3269 say aw+ no+
+(19:16:59) tomn: can anyone have food in halls?
+(19:17:05) Jonathan: yeah
+(19:17:16) Jonathan: turns out its 4 quid
+(19:17:23) tomn: i may have to do that some time than... how much is it?
+(19:17:29) tomn: hmm :/
+(19:17:32) Jonathan: and I'm probably the first person to invite someone along to share in the industrially produced slop
+(19:18:02) tomn: lol :p
+(19:18:21) Jonathan: but yeah -- you get some sort of main (choice of three: meat, vegiterian, fish) and some desert of some sort (salad or cake or doughnuts or whatever they have on)
+(19:18:47) Jonathan: and also whatever you want from the salad bar (or trough as we call it)
+(19:19:07) tomn: cool. i'll have to try a least once just to see what i'm 'missing out on' :p
+(19:19:09) Jonathan: you're very welcome to come if you like anyway
+(19:19:23) tomn: thanks.
+(19:20:34) ***matty3269 is enjoying mixing VERY loudly in my room
+(19:21:08) Jonathan: depends what day you come :) if you came today you'd be disapointed you went self catered (it was excellent -- plus double choc chip muffin) but if you go other days (unique-flavourless recipe boiled veg with a grim slab of misc meat and a questionable apple crumble) you'll be soo glad you didn't
+(19:21:27) Jonathan: matty3269: I tend to do that in the kitchen -- makes less mess on lino than carpet if you spill it
+(19:22:18) tomn: speaking of food... i should probably get some...
+(19:22:57) Jonathan: lol
+(19:23:09) Jonathan: if you come down now the scrapings might still be warm in the bin
+(19:23:25) Jonathan: actually no, its not the start of the month, they'll be re-processed into monday's meal
+(19:23:33) Jonathan: so scrap that [heh]
+(19:23:56) Jonathan: (but you'll still find them in the bin if you can avoid the chef's gun)
+(19:24:46) Jonathan: http://jhnet.co.uk/misc/contribPercent.png -- topical (but old)
+(19:25:02) Jonathan: its open office -- I just pressed a buttion, stfu you gnuplot users
+(19:27:30) tomn: i should do a percentage plot...
+(19:28:14) tomn: acctually, gnuplot is easier than waiting for oo.o to download... and on a small screen, openoffice isn't exactly easy to use.
+(19:28:39) Jonathan: first two are legit :)
+(19:31:18) tomn: first two?
+(19:32:16) Jonathan: oo.o is big to dl and crap on small screens
+(19:32:36) matty3269: wouldn't that be the last two?
+(19:32:42) Jonathan: as for plotting it, I know its an office clone and thus general familiarity doesn't count as being easy
+(19:32:45) Jonathan: matty3269: no
+(19:33:01) Jonathan: anyway
+(19:35:46) Jonathan: matty3269: to fill you in on the house software, me and tomn have been looking towards having a central server which handles events and properties of various objects. The objects may be devices on the i2c network or a camera on the door, etc. The central server will be interfaced with by other systems, for example /dev/house (btw, any views on having just /house ala /proc) or housebot (irc) or other things like consoles or plugins adding particular functionality
+(19:36:35) Jonathan: as for interfacing with the server I'm quite interested in trying pyro -- in essence it lets you use python objects running in another program/computer as if they were local
+(19:36:49) Jonathan: (basically an RPC-y type system)
+(19:37:10) Jonathan: do you have any views on that?
+(19:37:11) tomn: it would be interesting, but what if we want to interface with something other than python?
+(19:37:26) Jonathan: yeah -- I was thinking about that -- it is a pain there
+(19:38:13) Jonathan: we could do a simple commandline interface which exposes most stuff (via a python client to the server) which does HTTP style commands
+(19:38:36) Jonathan: that way you kill two birds with one stone: you've got a commandline interface and a way for almost any language to talk to it
+(19:38:37) matty3269: Qt :)
+(19:38:52) Jonathan: matty3269: there will be plenty of need for neat gui stuff :D
+(19:38:53) tomn: how about just doing a socket server with twisted? i had a look a while back and it's really effing nice: http://twistedmatrix.com/documents/current/core/examples/chatserver.py
+(19:39:14) matty3269: I cold do sockets in C
+(19:39:16) matty3269: ?
+(19:39:17) matty3269: could*
+(19:40:18) Jonathan: tomn: the disadvantage here is we do have to come up with a protocol and make sure we expose everything we ever need and in a sane way
+(19:40:41) Jonathan: also I don't like like 32 of that file much :p :D
+(19:41:38) matty3269: aghh I can't dind my glasses
+(19:41:40) tomn: lol :p
+(19:42:29) tomn: it actually makes sense - it creates a MyChat object for each connection.
+(19:42:39) Jonathan: yeah I know :) -- hence the :P
+(19:42:51) Jonathan: do you recon we'd be able to make a good enough protocol though?
+(19:43:05) matty3269 left the room (quit: EOF from client).
+(19:43:05) tomn: i think so.
+(19:43:22) Jonathan: isn't it just work we don't need though?
+(19:45:14) tomn: the advantage of pyro is that it exposes everything, but it makes all the internal api fixed - if you can access everything, then you will :p  with a custom server, you can easily add new bits, while leaing the old stuff in place, and all the internal api is flexible.
+(19:46:15) Jonathan: yeah... I suppose
+(19:46:45) Jonathan: I'm convinced then :P
+(19:47:01) tomn: regarding the protocol, we need to be able to list all the devices and their events/properties, set a property, get a property, and register (/unregister) some kind of callback on events.
+(19:47:27) Jonathan: I'd like to put forward my favouring of a directory-tree style addressing system
+(19:47:41) tomn: i was literally typing that :p
+(19:47:46) Jonathan: :D
+(19:48:17) Jonathan: wtf -- I just realised I had a ruler stuck in my headphones for the last half hour :s
+(19:48:32) tomn: lollage.
+(19:48:59) Jonathan: http://pyfaces.blogspot.com/ -- btw, something for the door?
+(19:49:17) Jonathan: (ok so python is the wrong language for this kind of thing but... :D
+(19:49:32) Jonathan: sorry, getting distracted here
+(19:50:01) tomn: coolness :D :D
+(19:50:51) Jonathan: would definately be cool as a way of a) signing in and out and b) epic stattage and c) possibly useful for security (email out if some guy shows up it doesn't know)
+(19:51:10) tomn: yeah, it's all good :)
+(19:51:41) Jonathan: riight.. back to the job in hand :D
+(19:51:55) Jonathan: so terminoligy wise, what will objects be called? Devices?
+(19:52:35) tomn: regarding directory structure, i think we should have /room/device/[properties, eg. status for lights]
+(19:53:07) tomn: and /room/device/events/[events, eg. on, off, change for lights]
+(19:53:28) Jonathan: yeah, cool
+(19:54:01) Jonathan: would it be possible to maybe have some special syntax for the events and stuff -- I don't like the idea of implying an event could be contained in the same place as a directory
+(19:54:30) tomn: ... and possibly /room/device/actions/[actions, eg. turn_on, turn_off for lights - probably not needed most of the time because of properties]
+(19:54:36) Jonathan: e.g. /room/device.propertyname and /room/device:eventname
+(19:54:59) tomn: actually, that's quite good.
+(19:55:01) tomn: :D
+(19:55:22) Jonathan: yeah -- that sounds cool
+(19:55:35) Jonathan: /room/device(actionname)
+(19:55:54) Jonathan: or /room/device(actionname lisp style args)
+(19:55:56) tomn: unless we just used the . syntax but have sifferent methods of operating on them - might make it easier to remember.
+(19:56:23) Jonathan: actually scrap my idea for args
+(19:56:32) tomn: "GET /room/lights.status"
+(19:56:41) tomn: "SET /room/lights.status 1"
+(19:56:50) Jonathan: yeah
+(19:56:58) Jonathan: I like equals signs myself
+(19:57:09) tomn: "CALL /room/lights.turn_on args...
+(19:57:30) Jonathan: CALL /kitchen/pot.colour black
+(19:57:39) Jonathan: (poor...)
+(19:57:42) tomn: error :p
+(19:58:23) Jonathan: hmm... I agree its more programming-y but given we're doing this from scratch I like the idea of having actions done differrently
+(20:00:21) tomn: hmm, not sure what you mean?
+(20:00:33) Jonathan: well just not use dot for methods
+(20:00:44) Jonathan: btw, what do we do about global properties?
+(20:00:57) Jonathan: e.g. occupants, energy consumption, etc.
+(20:00:58) tomn: /house?
+(20:01:07) Jonathan: yeah but /house/house/occupants
+(20:01:12) Jonathan: bit redundant
+(20:01:38) Jonathan: just stick em in the root?
+(20:02:51) tomn: yeah, i guess that would work. how do you address them with the protocol though? this is why i prefer things to just be iniform (ie, using / all the time.)
+(20:03:06) Jonathan: d
+(20:03:10) Jonathan: *well just /occupants
+(20:03:47) tomn: actually, yeah... i'm being an idiot.
+(20:03:56) Jonathan: it might also be good to have access to more raw data too -- e.g. maybe have a /dev/device_uri/raw_device_stuffs
+(20:04:21) tomn: sounds hackable.
+(20:05:12) Jonathan: well the reason being, how will the server clients deal with things, e.g. I presume the lighting controll stuff will be its own server and thus needs to get to raw IO pins on devices
+(20:06:13) tomn: i presumed that would be handled by, say the lights module on the server?
+(20:06:39) Jonathan: doesn't having modules *and* seperate servers seem like a lot of extra infrastructure to you?
+(20:06:52) tomn: hmm :/
+(20:07:32) tomn: so are you saying we have some kind of low-level i2c interface, and all the higher level interfaces just use that?
+(20:08:29) Jonathan: I'm saying we have an i2c network which has an interface which connects to the event server and pushes/catches fairly low level stuff in /dev then we have other servers which convert stuff in /dev to more high-level stuff
+(20:09:22) Jonathan: my view is that we should try to treat the whole i2c network as just a collection of I/O facilities around the house but nothing too intelligent
+(20:09:57) tomn: yeah, i think you're on the right track with that.
+(20:10:27) Jonathan: yes -- actually, rereading what you said I think that's what I meant :)
+(20:10:41) tomn: lol, this happens quite a lot :p
+(20:10:49) Jonathan: (sorry :P)
+(20:11:34) tomn: lol, i wasn't getting at you, i just find it funny :p
+(20:11:37) Jonathan: :(
+(20:11:47) Jonathan: another issue is how you deal with the problem of array and dictionary type values being stored
+(20:12:15) Jonathan: for example, /occupents
+(20:12:20) Jonathan: *spelling
+(20:12:43) tomn: i know you might hate me for this, but: just base the whole protocol on JSON?
+(20:12:45) Jonathan: and where the occupants each have their own properties (e.g. time in house, and such)
+(20:12:51) Jonathan: I don't dislike JSON at all
+(20:13:02) tomn: ah, good.
+(20:13:15) Jonathan: the only problem is how you go about expressing actions like get/set/call in json
+(20:14:20) tomn: i would just base the whole protocol on it, following something like [cation, *args]
+(20:14:42) tomn: for example: ["GET", "kitchen/lights/status"]
+(20:15:02) tomn: or ["SET", "kitchen/lights/status", 1]
+(20:16:38) Jonathan: or ["SET", "/occupants", {"tomn" : {"awesome" : true}}]
+(20:16:40) Jonathan: hmm
+(20:16:45) Jonathan: gets a bit messy there :/
+(20:17:48) Jonathan: how about doing it just as if it was a terminal session?
+(20:17:55) tomn: like?
+(20:18:36) Jonathan: well basically much more like you did before but using JSON to represent arguments
+(20:19:31) Jonathan: though thinking about it moving properties etc. back to being directories it becomes more intuative
+(20:19:31) Jonathan: /occupants/tom/time_in
+(20:20:21) tomn: yeah, i prefer that.
+(20:20:25) Jonathan: cool
+(20:21:17) tomn: i do like the idea of wrapping the whole protocol in json though - makes it so much easier to deal with edge cases and suchlike, even though it does have a little overhead.
+(20:21:31) Jonathan: overhead isn't really a concern
+(20:21:44) tomn: exactly.
+(20:22:21) Jonathan: wouldn't wrapping it in json make it a little lispy: ["set", "/occupants/tom/time_in", ...some unix time...]
+(20:22:37) tomn: lol, it does :)
+(20:22:45) Jonathan: just more angular :D
+(20:23:07) Jonathan: what about permissions?
+(20:23:30) Jonathan: we have two problems here -- the obvious technical ones and also the social one that we'll all have root if we wanted it
+(20:23:41) tomn: aww, we should implement it in common lisp, then just use the 'read' function to parse commands :p
+(20:23:55) Jonathan: is read ~ eval in lisp then? :P
+(20:24:02) tomn: nooo.
+(20:24:15) Jonathan: what does it do then :)
+(20:25:59) tomn: it's just the lisp expression arser, if i remember right, but i may be wrong...
+(20:26:11) tomn: *parser
+(20:26:18) Jonathan: (oh and as a side thought, ["notify", "/something/here", "change"] would be cool -- it could return an interrupt ID or something which the API in whatever language could bind to a callback locally)
+(20:26:23) Jonathan: cool
+(20:26:53) Jonathan: (also sorry to point out the obvious :))
+(20:29:43) tomn: yeah, something like that would be cool. since events are just nodes in the directory tree (sort of), i don't think you really have to split the object and the event up?
+(20:30:03) tomn: eg: ["notify", "/something/here/on_change"]
+(20:30:26) tomn: and yeah, callback id would be cool.
+(20:30:30) Jonathan: um, well that doesn't really make too much sense -- if you think of it as a directory tree that wouldn't make sense
+(20:31:28) Jonathan: though thinking about it that does mean pure events make more sense
+(20:32:28) Jonathan: and I suppose for the file system plugin treat /something/here/on_change/ as a directory full of shell scripts to execute
+(20:32:42) tomn: exactly.
+(20:32:59) Jonathan: which raises a point -- how will the file system plugin request to know every time any event is raised?
+(20:34:02) Jonathan: (or anything else which would care to know such an obscure question)
+(20:34:14) tomn: ah, one thing i was thinking - have the event string (/something/here/on_change) just be a regular expression, or something like that (file globbing?)
+(20:34:41) tomn: makes it easy re register all events on an object, or in a room, or all lights, or just all events.
+(20:34:51) Jonathan: hmm
+(20:35:29) tomn: ["notify", ".*"]
+(20:35:30) Jonathan: though there would be a few specialist non-regular-expression-optimal things like "any object with a power property and and with the essentail property set to false"
+(20:35:53) Jonathan: e.g. if we want to power-off all non-essential items in the house
+(20:36:09) tomn: yeah, it would be cool to design some kind of language for specifying that.
+(20:36:21) Jonathan: btw given the /something/here/on_change, how would the filesystem version get/set the value of "here" given here is a directory name
+(20:36:44) Jonathan: (my fear of the above language is it could (d)evolve into something like SQL...
+(20:36:54) tomn: (might be best to just have different nofify commands - "notify", "notify_re" for the different ways of fpecifying it.)
+(20:37:15) Jonathan: hmm
+(20:38:22) Jonathan: how about having a command which does a query and returns a list of URIs -- that way each command doesn't need to worry about that sort of thing
+(20:38:50) Jonathan: we're not going to have hundreds of things on this network so sending a command out 10 or so times isn't exactly hard work
+(20:38:59) tomn: i thought we were having /location/device/[stuff]?
+(20:39:29) Jonathan: sorry -- I'm asking stuff too quick :D what are you refferring to
+(20:39:41) Jonathan: (care to use voip or something more efficient?)
+(20:39:52) tomn: and yeah, maybe have a 'ls' command, and a 'notify_all' command, and let the client handle matching specific suff.
+(20:40:20) Jonathan: iccy -- we're going to have several clients and we don't want to have to implement searching that many times
+(20:40:41) Jonathan: hell, doing an SQL style query language wouldn't be *so* bad...
+(20:41:00) Jonathan: s/clients/apis
+(20:41:02) tomn: (sorry, i meant to set /something/here you would actually want to set /something/here/status.)
+(20:41:59) Jonathan: right, but what about /kitchen/light/status/on_change --- how would you set/read the value of "status" in the context of a file system?
+(20:42:08) tomn: i mean, for now 'ls', 'notify' (single) and 'notify_all' will do.
+(20:42:45) Jonathan: for all the mess it produces I'm in favour of not having any .*_all commands 
+(20:44:16) tomn: you don't you'd have /litchen/light/[status(property), on_change(event), turn_on(command), turn_off(command)]
+(20:44:51) Jonathan: oh right ok
+(20:48:03) tomn: ah, ok. in common lisp, the function i was talking about is read-from-string.
+(20:48:37) Jonathan: so for properties are we going to assume that properties are lazy? (e.g. there is no way to put a watch on a property without polling it -- this might be good so the i2c network isn't saturated by switches reporting back status/being requested)
+(20:48:38) tomn: eg, (eq (car (read-from-string "(set x 5)")) 'SET) is True
+(20:50:57) tomn: i was just thinking of the properties, events and actions being really simple and not connected together apart from th the modules.
+(20:51:14) tomn: s/ th / in /
+(20:51:27) Jonathan: yeah -- I like that
+(20:52:10) Jonathan: can I request the notify function be renamed to watch?
+(20:52:14) tomn: it just makes things simple, and for most things not much really needs to be implemented.
+(20:52:19) Jonathan: certainly
+(20:52:20) tomn: lol, sure :)
+(20:52:25) Jonathan: i.e. you watch an event
+(20:52:31) tomn: makes sense.
+(20:53:24) Jonathan: I'm wiring out the stuff we've decided on as quickly as I can :D
+(20:53:55) tomn: cool, that's a good idea :)
+(20:54:10) Jonathan: ok so how do we set up a new event?
+(20:54:45) Jonathan: just ["bind", "/path/to/event"] ?
+(20:55:36) tomn: i'm not sure what that does?
+(20:55:49) Jonathan: registers that uri being an event that can be watched
+(20:56:24) Jonathan: and then simply ["raise", "/path/to/event", "args here"]
+(20:56:56) tomn: isn't anything that's allowed to do that sat inside the server though?
+(20:57:29) karls [~karl@wh047b.halls.manchester.ac.uk] entered the room.
+(20:57:37) tomn: ...and anything external should just interface via function calls?
+(20:57:57) Jonathan: no -- a washing machine control server could create an event like /kitchen/washing/on_finished
+(20:58:58) tomn: i would have thought that everything like that would just be a python class?
+(20:59:39) Jonathan: I thought you were happy with doing everything as servers (i.e. seperate programs) and the event server being a fairly dumb server which simply sends out notifications and stores the directory tree
+(21:00:14) tomn: oh, ok. that's different. i would have thought it would be easier to keep it internal?
+(21:00:52) Jonathan: well in that case you've got two APIs -- the internal one for some things and an external one (using this protocol) which is for others
+(21:02:25) Jonathan: and given that the i2c system, the fs and other things will all be servers themselves then there isn't any real advantage to doing things like control logic and such inside the server anyway
+(21:03:01) Jonathan: I think keeping it separate would also be really nice and clean too, even if the server was modular
+(21:07:01) Jonathan: your thoughts?
+(21:09:44) tomn: yeah, i think you might be right. a generic event dispatch server would be a pretty cool thing to have written.
+(21:09:52) Jonathan: indeedy
+(21:11:04) tomn: so... how would you register a property then?
+(21:11:15) Jonathan: just set
+(21:11:49) tomn: so, when someone 'get's a property from the server, what happens?
+(21:12:37) Jonathan: ah right -- yes sorry -- my above idea about set is full of flaw
+(21:13:10) Jonathan: it should work like a python property -- one server can set it and when someone "get"s it it sends a request to that server
+(21:13:20) Jonathan: (and if the server disconnects or chooses to delete it it gets removed)
+(21:14:51) Jonathan: or could it be flexible -- i.e. you can either use it like that or use it as a regular variable depending on how it's defined
+(21:15:19) tomn: right...
+(21:16:07) Jonathan: so more formally speaking, you can either define it lazily or define it like a variable
+(21:16:31) Jonathan: so you use it with get and set, and you initialise it with two other commands
+(21:18:03) Jonathan: that make sense/seem sensible?
+(21:19:34) tomn: ok. i'm just drafting out a scenario here if you want to watch/comment before i'm finished: http://ietherpad.com/zeJdx9FDZB
+(21:19:47) Jonathan: ok
+(21:23:39) Jonathan: yep looks good
+(21:23:48) tomn: i'm happy with that.
+(21:24:36) tomn: ... and events and methods are all just a variation on that theme.
+(21:25:48) tomn: it's going to be a bitch to thread it all together and make it nice though i think.
+(21:27:34) Jonathan: any chance of removing the error handling stuff from properties
+(21:27:48) Jonathan: (remember that properties will be just plain files in the fs version)
+(21:27:56) Jonathan: s/handling/reporting
+(21:28:10) tomn: what if for some reason there is an reeor?
+(21:28:15) tomn: *error
+(21:28:30) Jonathan: if something buggers up simply return something sensible (either blank or ERROR or -1 --- whatever is sensible)
+(21:28:48) Jonathan: (brb)
+(21:28:55) tomn: if you're going to ever waht to return some kind of status code, you need to return one all the time to make it consistent.
+(21:29:54) Jonathan: yeah
+(21:30:07) Jonathan: but thats when you should use a method or something
+(21:30:13) Jonathan: I mean /proc doesn't raise errors
+(21:30:36) Jonathan: (sorry to keep likening our system to a file structure)
+(21:31:06) tomn: yeah, but /proc has no need to raise errors. what happens, if, for instance an arduino is unplugged?
+(21:31:20) Jonathan: then the file URI should become invalid
+(21:31:42) tomn: so when a client requests that url?
+(21:31:54) Jonathan: some sort of uri not found error
+(21:32:53) tomn: exactly. how do ypu plan to represent that without a status code?
+(21:32:55) Jonathan: and in this case if something does go wrong like that, higher level servers will notice something has gone missing and then either attempt to work-around or they too remove their dependant URIs
+(21:33:36) Jonathan: well treat them like exceptions -- you don't report status on function calls but exceptions can be spit out in a differrernt way to indacte the function failed and that you're not going to get any results
+(21:33:37) tomn: isn't it just easier to have a status code with every response though?
+(21:34:29) Jonathan: possibly -- what would be the sort of things that could require a status being sent back?
+(21:35:43) tomn: so yeah, when you get a string back from the server and it reads ["1"], and you get another that says ["error: house on fire"], how do you know thich is the error, and which is the exception, without the posibility of false positives?
+(21:36:30) tomn: the server is going to return something either way.
+(21:37:20) Jonathan: in a related question, how does the server/client know what a message is being sent in response to?
+(21:37:22) tomn: i don't ever really intend to mean anything other that 0->ok 1->exception
+(21:37:43) tomn: that's a good point.
+(21:37:55) Jonathan: ok I I'm convinced -- keep the status thing
+(21:38:02) tomn: :D
+(21:38:57) Jonathan: though I'd not like that to be routinely used by servers which report errors when something goes wrong rather than withdrawing their services as soon as they know something went bad
+(21:39:17) Jonathan: anyway, it would be nice for "conversations" to be kept seperate
+(21:39:52) Jonathan: giving every command a UUID or something would work but would be a PITA
+(21:40:07) tomn: yeah. in terms of sockets and whatnot, in the current model, actually, everything apart from the dispatch server is actually a client.
+(21:40:18) Jonathan: yes
+(21:40:53) Jonathan: the risk being run is that unless we make every operation blocking the server could ask two questions of a client in quick succession before recieving a reply
+(21:40:54) tomn: and yeah, that's what i was thinking. the other way would be to make everything both a client/server and make one connection per request.
+(21:41:20) Jonathan: yeah but then what happens if a box catches fire and there are properties registered? you'd have to ping everything lots
+(21:41:30) tomn: hmm :/
+(21:42:02) Jonathan: I like the idea of having the values created by a client simply vanishing if a client disconnects
+(21:42:15) tomn: yeag, that is rather nice.
+(21:42:20) tomn: *yeah
+(21:43:05) tomn: i think the only way is for each request to also carry some kind of id, and to quote that id in the response.
+(21:43:38) Jonathan: so how about the server sending out unique IDs (UUIDs, whatever) as tickets when information is requested (i.e. clients have to block on their own requests) and then all requests from the server have UUIDs on them
+(21:43:46) Jonathan: yeah
+(21:44:11) Jonathan: kinda makes the clients more annoying to implement but it would probably be fine if hidden behind a nice API
+(21:45:04) Jonathan: so in which case each command starts with some sort of refrence ID which all queries relating to that refrence must use?
+(21:45:28) tomn: i'm confuzzled.
+(21:45:45) karls: are you guys sure that there isn't a simpler way of doing it?
+(21:45:55) Jonathan: (example is being concocted)
+(21:47:13) tomn: like... ["GET", 12345, "foo/bar"] ... wait ... [0, 12345, "1"]
+(21:48:01) Jonathan: some client sends ["uuid1", "get", "/kitchen/lights/status"]
+(21:48:01) Jonathan:   dispatcher sends to light controller ["uuid1", "getprop", "/kitchen/lights/status"]
+(21:48:01) Jonathan:     light controller sends ["uuid1", 0, 1]
+(21:48:01) Jonathan:   dispatcher sends ["uuid1", 0, 1] to client
+(21:48:01) Jonathan: client is happy
+(21:49:39) Jonathan: that way all commands being sent with uuid1 are related to that specific request and so you can easily simulate a blocking request by blocking until a command with the uuid you sent out is recieved
+(21:49:54) tomn: yeah...
+(21:50:05) Jonathan: that sensible/ok/not-a-pain?
+(21:50:58) tomn: i would prefer to generate the uids at each level though based on an internal counter though.
+(21:51:01) Jonathan: karls: not really :( at least we haven't thought of anything -- the problem itself is quite complex and it has to be quite flexible too -- we'll all want to contribute to the system but don't want to be using python for everything
+(21:51:20) Jonathan: ah right -- ok yeah that is sensible enough
+(21:51:25) Jonathan: yeah -- stupid me
+(21:51:38) Jonathan: that would fail if a server requested a property from itself
+(21:52:04) tomn: or if two clients requested the came thing with the same id.
+(21:52:42) Jonathan: yeah so basically have each request send a fresh uuid with it and responses to a given uuid also carry that ID so there will be at most two messages ever being sent with the same uuid
+(21:52:48) tomn: that way they don't need to be globally unique, just an int based on an internal counter.
+(21:53:15) tomn: yeah, two messages, and one will be a response.
+(21:53:34) Jonathan: yeah but it kinda makes it a lot easier if they were globally unique as then your test for a message being a response to a specific request is super simple
+(21:53:37) Jonathan: yes
+(21:53:39) Jonathan: exactly
+(21:54:10) karls: brb, going to tesco
+(21:54:12) Jonathan: ok so that solves a number of issues then, no?
+(21:54:14) Jonathan: karls: k
+(21:54:26) tomn: actually, ince requests and responses can fly in any direction, we should have a "RESPONSE" command or something to make it more uniform (and easier to deal with messages.)
+(21:54:56) Jonathan: OK -- maybe RETURN (?)
+(21:55:05) Jonathan: that seems nice
+(21:55:23) Jonathan: is return ok?
+(21:55:33) tomn: go they need to be globally unique? as long as they're unique to whatever sent the request it's ok.
+(21:55:41) tomn: yeah, that's better.
+(21:56:05) Jonathan: it needs to be unique to reciever too -- what if you send a command to the reciever and they're listening for "2" from another client?
+(21:56:18) Jonathan: or ["2", "return", ...] even
+(21:56:44) Jonathan: oh wait no, if course, you know the sender too :P
+(21:56:48) Jonathan: *of course
+(21:57:12) tomn: uhuh :)
+(21:57:51) Jonathan: bonus -- this protocol might just be simple enough to implement on an arduino via the ethernet controller
+(21:57:57) tomn: this is actually really similar yo how my im server is going to work for COMP10052.
+(21:58:13) Jonathan: indeed -- same here
+(21:59:10) tomn: lol, we could have just based the whole thing on an irc server, and a load of bots that do different stuff...
+(21:59:27) tomn: would make debugging brilliantly easy
+(21:59:41) Jonathan: why? because you could use an IRC testsuite? :D
+(22:00:04) tomn: well, you just join the chanel and watch the messages fly :p
+(22:00:26) Jonathan: :)
+(22:01:27) tomn: i'm pretty happy with what we've got now.
+(22:01:28) Jonathan: actually the rule about a unique ID being used only twice should be voided: for things like a property definition it could be used there from then on to uniquely identify that property
+(22:02:30) Jonathan: or should it simply use the url
+(22:02:34) Jonathan: *uri
+(22:02:39) Jonathan: actually yeah, it should use the URI
+(22:02:41) Jonathan: definately
+(22:03:45) Jonathan: (brain fail there)
+(22:04:18) tomn: yeah... it's a bit pointless having multiple representations, especially when the path would probably be shorter than the guid :p
+(22:04:26) Jonathan: yeah :D
+(22:04:48) Jonathan: (as I say, quite a brain fail :D)
+(22:05:01) tomn: lol.
+(22:05:21) Jonathan: just making alterations to the spec to take into account this decision and then I'll either pad it 
+(22:05:28) Jonathan: (and once we're happy we can wiki it)
+(22:05:46) tomn: i really like some of the naming in the twisted module - the really low level bit is called "twisted.pair" :p
+(22:05:55) tomn: cool :)
+(22:06:09) Jonathan: approved :D
+(22:06:27) tomn: i think this is actually going to be easier to implement than the 'one big server' idea.
+(22:06:40) Jonathan: yeah
+(22:06:41) Jonathan: very much
+(22:07:10) Jonathan: plus our own personal development projects will be epicly easy to do -- you can run the program on your own box and simply point it at the central server
+(22:07:31) Jonathan: it certainly keeps all the constituent parts nice and simple anyway
+(22:08:52) tomn: yeah, definitely.
+(22:09:07) tomn: we still haven't addressed security yet.
+(22:09:10) Jonathan: no
+(22:09:24) Jonathan: I assume you'd agree with key based security?
+(22:09:30) Jonathan: *private
+(22:09:52) Jonathan: or are you meaning access rights?
+(22:10:09) tomn: well, both really.
+(22:10:11) Jonathan: ok
+(22:10:18) Jonathan: well lets do the second one first as its more difficult
+(22:10:31) tomn: we need to do them anyway. and it's a bit pointless having one without the other.
+(22:10:46) tomn: ok.
+(22:10:57) Jonathan: so as Schneier would say, its a social problem first and foremost so how where do we start on that
+(22:11:40) tomn: we need a way of associating each connection with a user.
+(22:12:32) Jonathan: well before that, resources -- all paths can have some sort of permission? seems sensible enough?
+(22:13:15) Jonathan: as for the connection its more like per-request not per connection
+(22:13:44) tomn: yeah. how about just having a concept of an 'owner', and an access control list for both read and write?
+(22:14:13) Jonathan: how about just do it group based and go unix style there (bonus: filesystem!)
+(22:14:20) tomn: i mean, we can do unix-style, but how about giving access to specific users?
+(22:15:02) Jonathan: but even still, we have the simple problem of enforceability -- we're not allowing any strangers onto this system, right? i.e. only us 5? and we all will have root (I think it would be unfair not to) and so any measures we put in will be worthless anyway
+(22:16:08) Jonathan: what I'm saying is, its a lot of work to put in and would ultimately be worthless for the designated users of this system
+(22:17:13) Jonathan: (don't get me wrong, I'm definately mostly motivated in this view because I can't see a security system being clean/easy to do rather than because it is unenforceable :))
+(22:17:17) tomn: yeah, it's true, but at the same time it would be cool to have.
+(22:17:24) Jonathan: yeah
+(22:17:48) Jonathan: well my personal view would be not to do it but if you strongly think we should I'm all up for doing it nicely :D
+(22:18:25) tomn: and, tbh, having to spend effort doing something is going to make me more likely to do it than it it's super simple.
+(22:18:50) tomn: what do you mean by not doing it? just leaving it open?
+(22:18:58) tomn: or just doing unix-style?
+(22:19:18) Jonathan: I mean simply not having any access control -- if you can authenticate with the sever you're trusted to do anything)
+(22:19:54) Jonathan: I mean be honest, if we can't trust each other on this system's use then we aren't going to be able to live with each other so the system is "unnecessary" as such
+(22:20:20) tomn: actually, i think i'm in the 'not doing it for now' camp - everyone is as vulnerable as each other - your incentive to not mess with other peoples lights is that they could mess with yours.
+(22:20:24) Jonathan: and I think unix style is fine but the challenge is that every request might go through several levels and deciding who the ultimate owner of that request is would be hard
+(22:20:42) Jonathan: indeed -- propper MAD security :D
+(22:20:49) tomn: yeah, lets just leave it for now, i agree.
+(22:20:53) Jonathan: ok
+(22:20:57) Jonathan: so, authentication then
+(22:21:09) tomn: is it necesary?
+(22:21:29) Jonathan: yeah -- if we have a visitor and they use our network, if we get an intruder, etc.
+(22:21:34) Jonathan: just a good simple safeguard
+(22:21:58) Jonathan: all it requires is the server to wait for a key to be sent before accepting commands and that would be it.
+(22:22:39) Jonathan: though bear in mind, until we introduce any cryptography there is the possibility of an arduino implementing this protocol so we should steer clear of it if possible
+(22:23:17) tomn: hmm :/
+(22:24:08) Jonathan: (whether that would be useful or not is debateable, probably not I'd say
+(22:24:25) Jonathan: what would be your reason for not having any authentication?
+(22:25:05) tomn: it wouldn't really bother me.
+(22:25:33) Jonathan: given how much work it would be I'd just like it to be there in case of smug, computer literate visitors
+(22:25:50) tomn: ok.
+(22:26:06) Jonathan: and bernard.
+(22:26:10) Jonathan: also bernard.
+(22:26:20) tomn: he isn't coming into our house :p
+(22:26:32) Jonathan: my point still stands
+(22:27:00) Jonathan: and I think we should let him at least see it once :D
+(22:27:22) tomn: actually, i agree with that.
+(22:27:53) Jonathan: that way we have some evidence that we have an epoch house :D
+(22:28:16) Jonathan: *independent evidence
+(22:28:20) Jonathan: :P
+(22:28:35) tomn: D:
+(22:28:40) tomn: *:D
+(22:30:02) Jonathan: are we going to do a chellenge-response auth btw for what it's worth?
+(22:30:45) tomn: is there any alternative?
+(22:30:54) Jonathan: well simply blindly sending a key :D
+(22:31:18) tomn: not clever :p
+(22:31:23) Jonathan: idd :D
+(22:31:26) tomn: but easy :p
+(22:31:49) Jonathan: oh -- what about phone-based interfaces?
+(22:32:13) Jonathan: or are we going to have a client for this server which provides "www-safe connections" ?
+(22:32:30) Jonathan: i.e. capable of very limited stuff and possibly PHP or something?
+(22:32:48) Jonathan: s/or //
+(22:33:23) tomn: i presume so, yeah. it should be really easy to interface this to php.
+(22:33:27) Jonathan: yeah -- really
+(22:33:31) Jonathan: oh -- what is going to be the syntax for actions btw?
+(22:34:15) Jonathan: (as a thought for the filesystem interface, actions could be a file and you simply write the arguments in it and then the file always contains the last response)
+(22:34:38) Jonathan: ["unique_id", "execute", "/path/to/action", "args"]
+(22:34:55) Jonathan: is execute the right name
+(22:34:59) Jonathan: *?
+(22:35:14) tomn: simple enough. i prefer call, or something like that though
+(22:35:38) Jonathan: ah yeah
+(22:35:42) Jonathan: bonus: its shorter :)
+(22:36:17) Jonathan: and then send docall to the client responsible?
+(22:36:44) Jonathan: can we change new.* to mk (so rm.* becomes more consistent)
+(22:36:54) Jonathan: *btw
+(22:37:16) tomn: yeah, that all sounds good.
+(22:38:45) tomn: i'm actually really excited about making something with twisted - it seems really really neat.
+(22:39:25) Jonathan: go on, inspire me -- the sample you sent seems like a bad example: it just looked like sockets but java-ifyed by being wrapped in not-very-differrent-abstractions
+(22:42:01) tomn: just the whole idea of standardizing callbacks and making everything asynchronous seems like a really good idea.
+(22:42:25) Jonathan: I am going to have to read up on this then :)
+(22:43:49) Jonathan: btw, I presume the dispatcher will effectively not have any stored state -- i.e. if it is restarted then it is up to all the clients to repopulate everything?
+(22:44:11) Jonathan: and in these circumstances how do we ensure clients start up in the right order to ensure no deadlocks?
+(22:46:06) Jonathan: oh and what do we do when a resource you're watching disapears (e.g. an event disapears)
+(22:46:44) tomn: as gAndy would most likely say:   shit bricks.
+(22:47:22) Jonathan: right -- I did a beautiful system like this with a datalogger where I had systems that interacted and it worked beautifully until I restarted from a saved file and stuff deadlocked :/
+(22:48:23) Jonathan: actually we only need to worry about events for the second question so could an "even deleted" type command be sent out to all watching clients?
+(22:49:50) tomn: yeah, that would be easy enough.
+(22:50:31) Jonathan: ok, so what name?
+(22:50:54) tomn: i think vars (i think) should be saved on the server, but the rest should just be sorted by the clients...
+(22:50:56) tomn: erm.
+(22:51:22) Jonathan: I think vars should still depend on the client who made em being connected so it cleans up when they disconnect
+(22:51:59) tomn: 'm not sure. i need some food - i'll be back in a bit.
+(22:52:03) Jonathan: ok
+(22:52:42) Jonathan: I'm going with eventdeleted
+(22:53:10) tomn: kk.
+(22:54:44) Jonathan: I think with the deadlock issue we should just stick to assuming that we won't have any cyclic depedencies
+(22:56:10) tomn: yeah, if we do, then it's either going to break well before the server is restarted, or not break when it is.
+(22:56:22) tomn: i think we should just not worry sbout it.
+(22:56:25) Jonathan: hopefully :)
+(22:56:29) Jonathan: yeah -- I'm with you on that :D
+(22:56:32) tomn: lol
+(22:56:48) Jonathan: (famous last words when heathcj9 decides to one day use this system to controll a nuclear power plant)
+(22:56:56) tomn: lol :)
+(22:57:00) Jonathan: (or when we eventually *do* install a nuclear arms systtem in the house....)
+(22:58:10) tomn: scary thought #273
+(22:58:40) Jonathan: oh -- we must have overflowed the scary thought counter!
+(22:58:45) Jonathan: I missed that
+(22:58:51) tomn: lol :)
+(22:58:54) Jonathan: its 64bit as well :/
+(22:59:28) Jonathan: can we agree to a convention of "low level" systems keeping their values in /sys/ or something similar?
+(22:59:30) tomn: yep. i knew i should have written it in python instead :(
+(22:59:34) Jonathan: that way the root directory tree is nice and clean
+(23:00:04) Jonathan: :D
+(23:00:05) tomn: yeah, ok.
+(23:00:59) tomn: brb.
+(23:01:28) Jonathan: k
+(23:12:05) Jonathan: http://ietherpad.com/roughprotocol
+(23:19:55) Jonathan: tomn: hello again
+(23:24:33) tomn: hey :D
+(23:24:46) tomn: i like :)
+(23:25:09) Jonathan: matches what we said anyway?
+(23:26:05) tomn: though... for the authentification, i would prefer it to be the same syntax as the rest - makes it easier to implement imho.
+(23:26:24) Jonathan: would it? I like the safety of having it implemented seperately
+(23:26:32) Jonathan: but sure, up to you :)
+(23:26:53) tomn: noooo :p
+(23:26:57) Jonathan: then again, I'm not sure how twisted is going to make things easy like that :D
+(23:27:05) Jonathan: lol -- ok change it then :P
+(23:27:38) tomn: at least make it use new-lines - it'll make it so so much easier to implement from what i've seen.
+(23:28:49) Jonathan: ok
+(23:28:57) Jonathan: though what happens if a response has a newline in the json?
+(23:29:25) tomn: json escapes newlines.
+(23:29:42) Jonathan: oh -- I did not know that
+(23:29:47) Jonathan: in which case, awesomecake all round
+(23:30:19) tomn: >>> print json.dumps(["foo\nbar"])
+(23:30:20) tomn: ["foo\nbar"]
+(23:30:35) Jonathan: coolnes
+(23:31:11) Jonathan: right -- time to get a'reading about twisted
+(23:32:13) Jonathan: so is twisted just an abstraction above sockets? it doesn't add any protocols or anything (i.e. you could talk to something using twisted with pure sockets) ?
+(23:32:59) tomn: no, it adds shitloads of stuff (it has an irc bot, i've just discovered)
+(23:33:24) tomn: but yeah, there are pure sockety things in there too.
+(23:33:40) tomn: http://twistedmatrix.com/documents/current/core/howto/clients.html#auto5
+(23:34:31) Jonathan: corr
+(23:35:01) Jonathan: I presume we'll be doing something reasonably close to sockets (or at least our protocol will be visible at the socket level to someone connecting)?
+(23:35:30) Jonathan: btw, we don't have a catchy name like rfc832 for our protocol... it needs one
+(23:36:43) tomn: i expect we'll subclass this: http://twistedmatrix.com/documents/current/api/twisted.protocols.basic.LineReceiver.html
+(23:37:38) Jonathan: right
+(23:47:18) Jonathan: actually -- going through the example thing... damn... twisted is nice
+(23:47:26) Jonathan: it is abstracting stuff but it doesn't hide what is going on
+(23:47:55) tomn: i'm glad you agree - i couldn't decide if you'd really like it, or really not :p
+(23:49:17) Jonathan: well its less awkward than sockets but its not retardedly simplistic so therefore it is better than any alternatives I can think of
+(23:49:26) tomn: also, it has a wrapper around the tk message loop, so you can run twisted and tk in the same loop rather than messang around with threads.
+(23:49:43) Jonathan: cool
+(23:49:46) Jonathan: does it have one for Qt?
+(23:50:20) tomn: i believe so, yeah.
+(23:50:29) Jonathan: ah, matt will be pleased
+(23:50:37) Jonathan: though tbh I expect Qt have their own socket system :s
+(23:50:48) tomn: and lol, yeah, it certainly isn't a 'one-trick pony' like the thing we were given in DS :p
+(23:50:51) Jonathan: because, y'know that is relevent to the greation of GUIs :/
+(23:50:59) Jonathan: yep
+(23:51:19) Jonathan: plus this is nice: self.transport.write -- I know what I'm talking to and at what level :D
+(23:51:22) Jonathan: learning is good :D
+(23:51:42) tomn: yep :)
+(23:52:32) tomn: i actually quite like the factory system, even if it does have a very java-ish name :p
+(23:52:47) Jonathan: I was just about to say -- actually on balance it might not be so bad
+(23:53:27) tomn: it's a bit pointless until you subclass it - it makes more sense then.
+(23:53:42) Jonathan: not quite -- you can just shove arbitary vars into it :p
+(23:54:00) Jonathan: but yeah
+(23:54:54) tomn: well, yeah - that's a bit messy though :p
+(23:55:00) tomn: also: http://twistedmatrix.com/documents/10.0.0/api/twisted.internet.protocol.ReconnectingClientFactory.html
+(23:55:12) Jonathan: sded -- Slightly Dodgy Event Dispatcher, pronounced s'deed
+(23:55:23) Jonathan: yeah -- I saw that
+(23:55:38) Jonathan: (name for the protocol ?)
+(23:55:47) tomn: lol, no idea.
+(23:56:00) Jonathan: karls: ideas?
+(23:56:22) tomn: just string some buzwords together and acronym the hell out of it :p
+(23:57:10) Jonathan: :D
+(23:57:30) Jonathan: take a list of rude or amusing words and swap the vowels and then acronym the hell out of that
+(23:59:37) Jonathan: shet -- Superb House Event Transmision -- pronounced like an heavily-accented irishman saying shit
+(00:00:29) Jonathan: ?
+(00:00:39) karls: sorry. yes. ideas.. hmm
+(00:01:37) Jonathan: or maybe shet pronounced like shed :D
+(00:01:42) Jonathan: I quite like that name :D
+(00:01:42) tomn: variation: shept -- Superb House Event and Property Transmision
+(00:02:08) Jonathan: adds an extra syllable though :/
+(00:02:33) karls: or, if we were to do it without an acronym, then we could use the regular 'inter'-s and 'tubes' here and there
+(00:02:48) Jonathan: I was about to say -- what would sound good with "Inter" prepended
+(00:02:54) tomn: intershet
+(00:02:56) karls: :D
+(00:02:58) Jonathan: damn straight
+(00:03:02) karls: housetube
+(00:03:13) tomn: :o
+(00:03:14) Jonathan: housetube is taken by whoever our ISP is
+(00:03:15) karls: interhouse shettube?
+(00:03:33) Jonathan: intershet
+(00:03:38) Jonathan: is the winner so far... imo :D
+(00:03:49) karls: interSHET then?
+(00:04:00) Jonathan: well strictly without the "inter" -- an optional prefix
+(00:04:08) tomn: i like it :)
+(00:04:16) karls: cool. 
+(00:04:25) Jonathan: simply so I can say shet to people straight faced in a technical context
+(00:04:37) Jonathan: "Yeah, uh, the shet server is down"
+(00:05:13) Jonathan: would you be happy to substitute Spiffing for Super?
+(00:05:25) Jonathan: *superb
+(00:05:35) Jonathan: Spiffing House Event and Transmission
+(00:05:42) tomn: yes. it all sounds good :)
+(00:05:42) Jonathan: *Spiffing House Event Transmission
+(00:05:52) Jonathan: obviously the most important part of the protocol :D
+(00:06:02) tomn: or spiffing house event tunneling?
+(00:06:10) karls: tubing :D ?
+(00:06:13) Jonathan: awww man... that is good
+(00:06:23) Jonathan: hmm, karls idea is also good...
+(00:06:33) Jonathan: tunneling sounds cooler though....
+(00:06:45) karls: everytime I say tubin I think of snowtubing for some reason..
+(00:06:51) karls: tubing*
+(00:06:52) tomn: i'm sure j616s would sgree.
+(00:07:02) tomn: *agree
+(00:07:34) Jonathan: aw... what about poor old matt at the cosplay party?
+(00:08:26) tomn: heathcj9: you might need to print out your new card on nice paper.
+(00:08:50) ***Jonathan is rofling
+(00:09:03) Jonathan: though mainly because I fell off my chair trying to find a pound coin I dropped
+(00:09:32) tomn: lol :)
+(00:09:42) Jonathan: right... shower time
+(00:10:09) Jonathan: I'm moving the protocol spec over to the house wiki
+(00:11:18) tomn: ok :)
+(00:12:28) Jonathan: http://www.uni.jhnet.co.uk/wiki/index.php?title=Shet -- neat wiki markup did a good job of that file :D
+(00:13:50) Jonathan: anyway -- shower
+(00:25:00) Jonathan: back
+(00:25:18) Jonathan: right, shall I go ahead and buy 18sg.net btw?
+(00:25:28) Jonathan: well not really buying as I don't pay anything for it
+(00:25:43) tomn: lol, i'd be very happy with that :)
+(00:26:11) Jonathan: ok -- here goes then
+(00:34:15) Jonathan: I'm going to register this anonymously appart from my name and "The University House Guys" -- is that ok?
+(00:34:30) karls: yeap
+(00:35:45) Jonathan: ugh... has to be registered
+(00:35:53) Jonathan: oh well the postal spam could be fun...?
+(00:36:56) tomn: lol :)
+(00:37:54) tomn: what is this domain actually going to point at eventually?
+(00:38:17) Jonathan: We have added 18sg.net to our registration queue.
+(00:38:17) Jonathan: You will receive an email within 15 minutes when it has been registered. If you don't receive an email please contact our support team as this may indicate some kind of problem!
+(00:38:17) Jonathan: Please note that the domain will not work for at least a day or two as DNS propagates.
+(00:38:49) Jonathan: I've set it so that the domain on its own points at a dreamhost apache server but we have full dns access as you'd expect so we can do what we like
+(00:40:03) Jonathan: once the DNS propogates we can get dynamic dns setup for all of us at [name].18sg.net
+(00:40:20) tomn: oh, ok. that's good :)
+(00:40:40) Jonathan: I'll also make wiki.18sg.net is a mirror of the wiki
+(00:41:15) tomn: cool.
+(00:41:21) Jonathan: I've bought the domain for a year but I am not too sure how willing dreamhost are to give them up -- I'd presume they're not one of the dicks who charge some fee to transfer
+(00:43:15) Jonathan: oh -- for when we signup for utilities and stuff I recon we should use an @18sg.net email address to see what sort of spam we get off them throughout the year
+(00:44:11) tomn: yeah, as long as it's reliable.
+(00:44:50) Jonathan: I've been using mail@jhnet.co.uk as a forwarder to mossblaser@gmail.com for ages and not had any problems
+(00:45:02) tomn: we should ask nemo to change our email addresses to [our names]@18sg.net
+(00:45:18) Jonathan: ah yes :D
+(00:46:19) tomn: also: when we eventually leave, sell the next occupants the domain name for a tidy profit :D
+(00:46:19) Jonathan: yey :D the domain is registered and the message was signed "The Happy DreamHost Domain Registration Bot" :D
+(00:46:24) Jonathan: ahahaha :D
+(00:46:47) Jonathan: tis a point -- do you think we'd be likely be staying for a second year?
+(00:47:14) tomn: i think so.
+(00:47:27) Jonathan: accounting for years in industry?
+(00:47:57) tomn: can't remember when that is?
+(00:48:05) karls: the third year
+(00:48:12) tomn: hmm :/
+(00:48:31) karls: am I the only one doing industrial experience?
+(00:48:43) tomn: i am, supposedly.
+(00:54:10) tomn: heathcj9: do you have itchy fingers?
+(00:55:15) Jonathan: not really...?
+(00:56:12) tomn: oh, i kind of want to start work on interSHET... sad as that may be :p
+(00:56:49) Jonathan: I definately do
+(00:57:19) Jonathan: though it is quite early and I got distracted by dreamhost basically running a pyramid scheme: I get $97 if I refer someone to them
+(00:57:34) Jonathan: which is most of my hosting fee for next year....
+(00:57:51) tomn: really? that's quite a lot of money.
+(00:58:20) Jonathan: yeah -- its fairly expensive compared to other crappy hosting companies
+(00:58:22) Jonathan: but I do get a lot
+(00:58:33) Jonathan: or do you mean the money I get refferred?
+(00:58:59) tomn: yeah, the money you get for referring someone.
+(00:59:04) Jonathan: well they offer either 10% of your referree's bill (and 5% of their referrees bills) or a one time of 97 dollars
+(00:59:47) tomn: right.
+(00:59:59) Jonathan: I'm paying £77.69 ish for a year
+(01:00:35) tomn: yeah. lol :p
+(01:01:05) Jonathan: as you expect with service companies, get someone signed up and it pays for itself easily :D
+(01:01:18) Jonathan: but yeah -- just need to find some other willing victims
+(01:02:24) tomn: lol, don't look at me ;p
+(01:03:23) Jonathan: :D lol -- no I know you are with whatsit
+(01:03:24) Jonathan: amazon
+(01:03:54) Jonathan: 130.88.193.125 is giving me a lot of hits on my site atm -- I assume that is where your script is running?
+(01:04:51) tomn: i just sshed onto it, and i ended up on soba, so yeah :p
+(01:05:07) Jonathan: lol
+(01:05:08) tomn: i still need to fix that script...
+(01:06:51) Jonathan: right -- beddy bye time!
+(01:07:08) karls: bye
+(01:07:14) #uhc: You're not channel operator
+(01:07:32) tomn: good night :)
+(01:08:03) The account has disconnected and you are no longer in this chat. You will automatically rejoin the chat when the account reconnects.

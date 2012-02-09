@@ -92,6 +92,11 @@ a:hover {
 }
 
 
+li {
+	padding-bottom : 1ex;
+}
+
+
 blockquote {
 	font-style : italic;
 	font-size : 12pt;
@@ -105,4 +110,13 @@ blockquote span.attribution {
 
 blockquote span.attribution:before {
 	content:"— ";
+}
+
+pre {
+	text-align : left;
+	
+	color : #555753;
+	
+	margin-left : 2em;
+	margin-right : 2em;
 }
