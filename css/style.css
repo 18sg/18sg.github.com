@@ -82,5 +82,27 @@ a:hover {
 .right {
 	float : right;
 	margin-left   : 15pt;
-	margin-bottom : 15pt;
+	margin-bottom : 10pt;
+}
+
+.left {
+	float : left;
+	margin-right   : 15pt;
+	margin-bottom : 10pt;
+}
+
+
+blockquote {
+	font-style : italic;
+	font-size : 12pt;
+}
+
+blockquote span.attribution {
+	display : block;
+	color : #555753;
+	font-size : 9pt;
+}
+
+blockquote span.attribution:before {
+	content:"— ";
 }

@@ -21,55 +21,69 @@
 				        allowfullscreen></iframe>
 				</div>
 				
-				<p>This is the story of a group of Computer Science undergraduates and
+				<p>This is the story of a <a href="https://github.com/18sg/">group of
+				Computer Science undergraduates</a> and
 				our quest to avoid work at all costs by building a
 				<a href="http://en.wikipedia.org/wiki/Home_automation">home automation</a>
 				system for their house. Its a tale of ridiculous hacks, novel
-				archetectures and, above all, <del>liberal use of blu-tack</del> fun.</p>
+				architectures and, above all, <del>liberal use of blu-tack</del> fun.</p>
 				
-				<p>Sed a egestas magna. Aliquam blandit aliquam est at egestas. Donec
-				tincidunt mauris id sapien mattis laoreet. Quisque vitae tempor sem.
-				Suspendisse laoreet, diam vel ultrices porttitor, sem felis luctus
-				purus, ut commodo mi tellus ac mauris. Mauris a nisi sit amet est
-				fermentum faucibus. Vivamus auctor, ipsum in viverra bibendum, dui sem
-				vehicula massa, vel viverra urna felis ac elit. In nec massa quis arcu
-				viverra aliquam vitae sed turpis. Curabitur interdum bibendum dolor, non
-				placerat neque rutrum eget. Phasellus lacus justo, ultricies ac congue
-				nec, venenatis in augue. Mauris mollis placerat enim non ullamcorper.
-				Vivamus eget mi a elit pellentesque faucibus.</p>
+				<p>After meeting in our first year we decided we wanted to try and do
+				something cool with our house. The resulting list of ideas was laughably
+				ambitious, especially given that we couldn't really do anything to the
+				building itself and that we also had to eat.</p>
 				
-				<h2>Motivation & Goals</h2>
+				<p>Two years and many hacks later and we have a remarkably feature-rich
+				home automation system. We've got automated lights, media control, a
+				washing machine that emails you, a recipe-browsing control panel, an
+				electronic door-stop, a <a
+				href="http://www.youtube.com/watch?v=tvLDm8821jQ">doop</a> button and
+				more! The whole thing is built on our own custom home automation system,
+				'SHET', and designed to be extremely hackable.</p>
 				
-				<p>Mauris dignissim egestas urna id tempor. Aliquam erat volutpat.
-				Aenean ut semper lacus. Proin vel purus sem, ac faucibus erat. Donec
-				suscipit egestas laoreet. Aliquam nisl lectus, malesuada at adipiscing
-				pellentesque, imperdiet eget purus. Fusce turpis quam, hendrerit id
-				consectetur nec, lacinia non leo. Sed felis odio, vulputate nec pharetra
-				a, sodales vitae turpis. Aliquam sit amet nunc tellus, vel lobortis
-				nunc. Aenean ut purus diam. Nam sit amet diam nec dui euismod faucibus
-				ut in ipsum. Sed nec ornare lectus. Cras pretium mi at ligula luctus
-				tincidunt. Donec dignissim congue porttitor. Praesent elit urna, auctor
-				ut iaculis et, dignissim at neque.</p>
+				<h2>In The Beginning... (Motivation)</h2>
 				
-				<p>Suspendisse interdum ante sed justo pulvinar feugiat. Fusce ipsum
-				est, adipiscing eu placerat ac, venenatis nec lacus. Nunc rutrum velit
-				id elit vulputate ultrices. Sed eget euismod turpis. Lorem ipsum dolor
-				sit amet, consectetur adipiscing elit. Mauris tincidunt, odio eu
-				vulputate faucibus, tellus lorem egestas lacus, vitae imperdiet massa
-				lorem sed sem. Curabitur non accumsan quam. Praesent sit amet dui dui.
-				Quisque tellus mi, rutrum quis tristique et, ornare a ante.</p>
+				<p>We started our grand plan listing off all manner of things we wanted
+				our system to do. Apart from the slight concern of how we'd afford food
+				after building this system, we also had to consider the wrath of the
+				landlord. Whatever we built would have to be easily removed and not do
+				(too much) damage to the house.</p>
 				
-				<h2>SHET House Event Tunneling</h2>
+				<img class="figure left" src="images/frontDoor.jpg" alt="The front of the house">
+				<p>Our search for a house was a mixed affair. In the 3rd house with
+				more mould than wallpaper, Tom was excited to discover one who's
+				electricity meter had a light that flashed at a rate proportional to
+				usage. Despite this critically important feature, we eventually decided
+				to go somewhere else and landed up at 18 South Grove.</p>
 				
-				<p>Nam cursus euismod dignissim. Morbi sed libero massa. Pellentesque
-				habitant morbi tristique senectus et netus et malesuada fames ac turpis
-				egestas. Vestibulum tristique, justo at elementum eleifend, nunc tortor
-				condimentum velit, sit amet tincidunt tortor dolor ac ligula.
-				Pellentesque sodales gravida magna, a posuere mi sollicitudin a. Nullam
-				sit amet augue neque, quis ullamcorper lorem. Mauris molestie nisi ac
-				tellus vestibulum tincidunt.</p>
+				<p>With our house found, we started thinking about what we wanted our
+				home automation system to be like. Looking around the web we discovered
+				that most systems were pretty bad. They generally were pretty clunky and
+				seemingly <a
+				href="http://en.wikipedia.org/wiki/X10_(industry_standard)">designed for
+				a bygone era</a> or <a href="http://www.lightwaverf.com/"
+				rel="nofollow">extremely limited and closed</a>. We wanted something
+				that was really flexible, hackable and actually nice to work with.</p>
 				
+				<p>Seeing as we are all students, things were obviously going to have to
+				be cheap. This ruled out a lot of options where specialist hardware was
+				needed. Electronics knowledge (for all but Tom) was also in short
+				supply which meant that the system would have to be electrically fairly
+				simple. It also meant that high-voltage stuff was completely out of
+				bounds.</p>
 				
+				<h2>SHET House Event Tunnelling (Designing the Software)</h2>
+				
+				<p>Our reaction to the problem of making the system hackable was a
+				somewhat obvious one for any self-respecting *nix user:
+				<blockquote>
+					"Shell scripts!"
+					<span class="attribution">Jonathan</span>
+				</blockquote>
+				Luckily, sanity prevailed but the idea stuck. We decided that having a
+				file system-like tree containing all the controllable things in our
+				house was a cool way of doing things.
+				</p>
 	</div>
 </body>
 </html>
