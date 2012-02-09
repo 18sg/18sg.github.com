@@ -82,8 +82,56 @@
 				</blockquote>
 				Luckily, sanity prevailed but the idea stuck. We decided that having a
 				file system-like tree containing all the controllable things in our
-				house was a cool way of doing things.
-				</p>
+				house was a cool way of doing things. For example,
+				<code>/lounge/lights</code> would control the lights in the lounge and
+				<code>/jonathan/sound/speakers/volume</code> would control the volume of
+				Jonathan's speakers.</p>
+				
+				<p>With the idea of a 'file-system' full of real things, we set out to
+				think about how this could work. We eventually settled with the idea
+				that there would be three types of thing in the system:</p>
+				
+				<ul>
+					<li><strong>Properties:</strong>
+						For example, 'light' or 'volume'. These are values that can be got
+						and set.
+					</li>
+					<li><strong>Events:</strong>
+						For example, 'motion detected' or 'washing finished'. These are
+						events that can be triggered by real-world or software events.
+					</li>
+					<li><strong>Actions:</strong>
+						For example, 'close door', 'pause' or 'is washing machine in use'.
+						These are a bit like function calls and can optionally take
+						arguments and return values.
+					</li>
+				</ul>
+				
+				<p>Unfortunately, this model doesn't really fit into a real file system
+				and so the idea of using a <a
+				href="http://en.wikipedia.org/wiki/Filesystem_in_Userspace">FUSE</a>
+				file system to literally 'mount' our house was quickly abandoned.
+				Instead we settled on producing a command-line utility and API for
+				accessing the system.</p>
+				
+				<p>Since the system was going to be house-wide it was going to need to
+				run across a network. After looking around for libraries and protocols
+				we could use to implement our system we eventually decided to write our
+				own. Event-based systems existed but they were either far too
+				enterprisey or too complicated. We also looked at using a standard <a
+				href="http://en.wikipedia.org/wiki/Remote_procedure_call">RPC</a>
+				library but these once again proved overly complicated and lacked a
+				reasonable way dealing with events.</p>
+				
+				<img class="figure right"
+				     src="images/shetDiagram.png"
+				     alt="Diagram showing many clients connected to a single SHET Server">
+				<p>We decided on a centralised architecture with a single server and
+				multiple clients. In our system the server would be pretty 'dumb' with
+				all the application logic going on in the clients. The clients tell the
+				server what nodes in the tree they contained and set/get properties,
+				call actions or listen for events via the server that were created by
+				other clients.</p>
 	</div>
 </body>
 </html>
