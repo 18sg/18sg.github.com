@@ -133,6 +133,12 @@
 			call actions or listen for events via the server that were created by
 			other clients.</p>
 			
+			<p>For example, we could have a client connected to light switches in the
+			house, a client which monitored motion sensors and another client which
+			listened for motion events from the second client and turned lights
+			attached to the first on and off as needed. We could also run clients on
+			our own computers to allow media players to be controlled over SHET.</p>
+			
 			<p>Speed wasn't an issue seeing as this would be running on a LAN and so
 			we focused our efforts on making the protocol simple human readable.
 			After wrangling with some RPC frameworks and seeing how much hassle data
@@ -158,7 +164,203 @@ it :p
 (23:57:30) Jonathan: take a list of rude or amusing words and swap the vowels
 and then acronym the hell out of that </pre>
 			
-			<p></p>
+			<p>With the protocol designed, implementation was next on the list.
+			Coursework deadlines loomed and so there was no time like the present and
+			Tom set about writing the <a href="https://github.com/18sg/SHET">SHET
+			Python API and SHET server</a> using the <a
+			href="http://twistedmatrix.com/trac/">Twisted framework</a>. Twisted
+			describes itself as "an event-driven networking engine written in Python"
+			and provides a really nice API for implementing network protocols.</p>
+			
+			<!-- TODO: Example client here -->
+			
+			<p>As well as a Python API, a command-line utility was also made
+			(complete with bash-completion). It allowed easy direct interaction with
+			SHET and its servers. For example, you could browse through the tree with
+			tab completion:
+			
+<pre>
+$ shet /jonathan/<span class="output">&lt;tab&gt;
+/jonathan/arduino/  /jonathan/irc/      /jonathan/sound/
+/jonathan/desktop/  /jonathan/mpd/      /jonathan/tts/
+/jonathan/email     /jonathan/sms</span></pre>
+			
+			Call actions (with arguments) and see their returned values:
+			
+<pre>
+$ shet /matt/mpd/toggle
+<span class="output">0</span>
+$ shet /tom/sms "Let me know when you get in"
+<span class="output">null</span></pre>
+			
+			Get and set properties:
+			
+<pre>
+$ shet /jonathan/sound/speakers/volume
+<span class="output">100</span>
+$ shet /jonathan/sound/speakers/volume 21
+<span class="output">null</span>
+$ shet /jonathan/sound/speakers/volume
+<span class="output">21</span></pre>
+			
+			Watch events being raised:
+			
+<pre>
+$ shet /lounge/panel/pressed
+<span class="output">[6]
+[4]
+[1]</span></pre>
+			</p>
+			
+			<p>Of course, this interface meant that we could actually write shell
+			scripts to control our house. For example, alarm clocks which could turn
+			on lights and music could be created in seconds using a <a
+			href="http://en.wikipedia.org/wiki/Cron">cron</a> job.</p>
+			
+			<p>After a while we got fed up of the command-line client being relatively
+			slow (due to the overhead of starting Python). This (and further
+			coursework deadlines) was all the motivation it took for Tom to write a <a
+			href="https://github.com/18sg/SHETC">C library for SHET</a> and a <a
+			href="https://github.com/18sg/SHETCClient">command-line SHET client
+			written in C</a>.</p>
+			
+			<p>The madness didn't stop here either as a <a
+			href="https://github.com/18sg/SHET.IO">JavaScript library</a> appeared
+			allowing us to build web interfaces trivially for any device. The library
+			is built on <a href="http://nodejs.org/">Node.js</a> and <a
+			href="http://socket.io/">Socket.IO</a> and is just as feature complete as
+			the C and Python versions.</p>
+		
+		<h2>SHETSource (Controlling Real-World Things)</h2>
+			<img class="figure left"
+			     src="images/arduino.jpg"
+			     alt="An Arduino board.">
+			<p>Right from the start, our aim was to control real things in our house
+			like the lights. This meant having these things somehow connected to SHET.
+			The answer we came up with was to use <a
+			href="http://arduino.cc/">Arduinos</a> thanks to their ease of use and
+			off-the-shelf availability. They would allow us to run simple programs
+			which controlled motors, switches, sensors, lights and anything else we
+			could wire up around the house.</p>
+			
+			<p>Of course, connecting these Arduinos to SHET posed a problem. Our first
+			thought was that we might use an <a
+			href="http://arduino.cc/en/Main/ArduinoEthernetShield">Ethernet shield</a>
+			and connect them all to our computer network. Unfortunately, the shields
+			would be too expensive and since there would only be one network socket in
+			each room, we'd have to buy lots of Ethernet switches too. We'd also need
+			to power the Arduinos and their attached peripherals. <a
+			href="http://en.wikipedia.org/wiki/Power_over_Ethernet">Power-over-Ethernet</a>
+			was deemed too complicated and once again, too expensive.</p>
+			
+			<p>After dismissing various bad ideas involving long USB cables and
+			repeaters, Tom remembered that 10/100 Ethernet <a
+			href="http://en.wikipedia.org/wiki/Ethernet_over_twisted_pair#Cabling">only
+			uses four of the eight wires</a> in a standard CAT-5 cable. As we didn't
+			plan on using gigabit networking in our house, it meant we'd have four
+			wires running from somewhere central in the house to every other room.</p>
+			
+			<!-- TODO: Picture of an adapter/socket -->
+			<p>In order to use these unused wires, we had to make adapters which
+			split off the four Ethernet wires and the four spare wires at each end.
+			This meant re-writing the wall-sockets in each room and making adapters
+			for the cables in our <del>comms</del> electrical meter cupboard where
+			they were connected to the switch.</p>
+			
+			<p>You might be wondering how common it is to find a full CAT-5
+			installation in a cheap student house and the answer is: not at all. When
+			our very keen landlord offered to do "anything we could think of" while
+			renovating the property we were pretty sceptical. A joking remark about
+			fitting CAT-5 (and a plasma TV) were met with "sure" and we left not
+			really thinking anything would happen. When he later contacted us to find
+			out where we'd like the wall sockets we were pretty surprised.</p>
+			
+			<img class="figure right"
+			     src="images/arduinoI2C.jpg"
+			     alt="Two Arduinos connected via I2C via a mess of wires.">
+			<p>So, with four wires available to us, this meant two for power and two
+			for data (to keep things simple). Jonathan started experimenting with <a
+			href="http://en.wikipedia.org/wiki/I%C2%B2C">I2C</a>, a simple data bus
+			protocol, to connect the Arduinos together. There would be a 'master'
+			Arduino connected to our server which would act as the interface between
+			all the other Arduinos and SHET.</p>
+			
+			<p>Despite our enthusiasm, we realised I2C really wasn't designed for long
+			wires. After lots of head-scratching, continuity testing and fiddling with
+			I2C settings Tom eventually found an I2C booster that might be the answer
+			to our problems. A few days later and we wired up our shiny boosters
+			and...it still didn't work.</p>
+			
+			<p>At this point, we scrapped our plan of using I2C and instead started
+			building a simple software serial library with basic flow control
+			capabilities. To keep things simple, we decided to abandon the idea of
+			using a bus and instead would connect the two data wires of each Arduino
+			around the house directly into the otherwise unused pins of the master
+			Arduino. The master would then route data to and from our server over USB.</p>
+			
+			<p>Once again we connected everything up and...it worked! Now all we
+			needed was a way of exposing all this to SHET.</p>
+			
+			<p>After seeing the fairly dreadful performance of our serial link, we
+			ditched any ideas about using the regular SHET protocol. Instead we
+			considered a simple protocol which basically forwarded control of the IO
+			pins back to our server. This idea seemed like an extremely wasteful use
+			of Arduinos and so Jonathan set about designing a simple protocol which
+			complemented SHET.</p>
+			
+			<p>The idea was that each Arduino should be able to create events,
+			properties and actions within SHET. These could be, for example, motion
+			sensors, lights and buzzers. To keep things simple, it was decided that
+			Arduinos would not be able to access other events, properties and actions
+			within SHET, instead SHET clients would be written to fill the gap. This
+			also forced us to keep our "application logic" off the Arduinos which
+			would save lots of time constantly reprogramming them.</p>
+			
+			<p>From this idea, <a
+			href="https://github.com/18sg/SHETSource">SHETSource</a> was born making
+			it trivial to connect real-world things to SHET. Take a look at the
+			following Arduino sketch which makes the internal LED controllable over
+			SHET:</p>
+			
+<pre>
+#include &lt;pins.h&gt;
+#include &lt;comms.h&gt;
+#include &lt;SHETSource.h&gt;
+
+/* Connect to SHETSource via pins 2 and 3. */
+DirectPins pins = DirectPins(2,3);
+Comms comms = Comms(&amp;pins);
+
+/* The SHETSource client. Set that by default, nodes are created in the
+ * /arduino/ subdirectory in SHET. */
+SHETSource::Client client = SHETSource::Client(&amp;comms, "arduino");
+
+/* Get the state of the LED */
+int get_led(void) {
+	return digitalRead(13);
+}
+
+/* Set the state of the LED */
+void get_led(int state) {
+	digitalWrite(13, state);
+}
+
+void setup() {
+	client.Init();
+	
+	/* Use the built-in LED */
+	pinMode(13, OUTPUT);
+	
+	/* Register a property for the LED in /arduino/led. */
+	client.AddProperty("led", set_led, get_led);
+}
+
+
+void loop() {
+	/* Execute one iteration of the SHETSource mainloop. */
+	client.DoSHET();
+} </pre>
+			
 	</div>
 </body>
 </html>
