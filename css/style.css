@@ -91,6 +91,11 @@ a:hover {
 	margin-bottom : 10pt;
 }
 
+.hspace {
+	padding-left : 2em;
+	padding-right : 2em;
+}
+
 
 li {
 	padding-bottom : 1ex;
