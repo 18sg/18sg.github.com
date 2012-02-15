@@ -76,19 +76,21 @@ a:hover {
 }
 
 .figure {
-
+	margin-bottom : 10pt;
 }
 
 .right {
 	float : right;
 	margin-left   : 15pt;
-	margin-bottom : 10pt;
 }
 
 .left {
 	float : left;
 	margin-right   : 15pt;
-	margin-bottom : 10pt;
+}
+
+.center {
+	text-align : center;
 }
 
 .hspace {
