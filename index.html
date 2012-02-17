@@ -130,9 +130,10 @@
 			library but these once again proved overly complicated and lacked a
 			reasonable way dealing with events.</p>
 			
-			<img class="figure right"
-			     src="images/shetDiagram.png"
-			     alt="Diagram showing many clients connected to a single SHET Server">
+			<div class="figure center">
+				<img src="images/shetSystemModel.png"
+				     alt="A server with multiple clients acting together as an alarm.">
+			</div>
 			<p>We decided on a centralised architecture with a single server and
 			multiple clients. In our system the server would be pretty 'dumb' with
 			all the application logic going on in the clients. The clients tell the
@@ -239,7 +240,7 @@ $ shet /lounge/panel/pressed
 			the C and Python versions.</p>
 		
 		<h2>SHET-ify all the things! (Controlling Computers)</h2>
-			<!-- TODO: Talk about MPD, SMS, email, IRC, bind -->
+			<!-- TODO: Talk about MPD, SMS, email, IRC, tts, bind, keybind -->
 		
 		<h2>SHETSource (Controlling Real-World Things)</h2>
 			<img class="figure left"
@@ -481,7 +482,124 @@ void loop() {
 		
 		
 		<h2>The Button Panel (of Dreams and Nightmares)</h2>
-			<!-- TODO: Also talk about washing machine, recipes, tts -->
+			<p>Despite the fact that our system allowed us to automate many things,
+			others would always require direct human interaction. One place in
+			particular, our lounge &amp; kitchen, required particular attention as
+			there were plenty of opportunities for SHET control.</p>
+			
+			<p>We search around the piles of miscellaneous buttons, dials and LEDs we
+			had lying around and came up with an idea for a control panel. As there
+			are five of us in the house, we wanted to have at least one button per
+			person. For example, you could press a button and your playlist would be
+			copied onto the computer in the lounge. In order to make the most of this
+			small number of buttons, we wanted to allow chording (pressing more than
+			one key at once) and long-pressing to squeeze more functions into the
+			panel.</p>
+			
+			<p>Despite the existence of theoretically up to 30 different actions, the
+			system would be very arbitrary and unpleasant to use or learn. To make
+			things clearer, we decided we'd add another button to allow multiple modes
+			to be selected. For example, in a 'music' mode, you can easily control
+			playback by pressing one of the five buttons or grab your playlist by
+			pressing and holding 'your' button (as dictated by the alphabetical
+			ordering of our names). In a 'washing machine reminder' mode, you could
+			press your button to book a reminder and press-and-hold to clear it. To
+			indicate what mode the panel was in, we added an RGB LED and each mode was
+			allocated a colour.</p>
+			
+			<p>Pressing the mode button would cycle through the different modes
+			(giving a pleasing demo of the RGB LED...) and pressing the mode button
+			along with one of the five main buttons a specific mode could be selected.
+			This meant that we'd have only 5 modes and that wouldn't allow us to also
+			have our own personalised modes. As a result, we added a second mode
+			button which gave us each our own personal modes.</p>
+			
+			<p>With all this talk of modes Matt, our resident <a
+			href="#TODO emacs_finger">Emacs</a> user, was getting uncomfortable. We're
+			also computer scientists and so the thought of being limited to only 300
+			actions seemed limiting. To improve the situation, a modifier key was
+			added named the 'middle-switch'.</p>
+			
+			<p>Surprisingly, this system proved reasonably easy to use, especially
+			given that in essence it was a box with 8 anonymous buttons and an LED.
+			Now that we had our system, we needed a way to bind key presses to things
+			in SHET. Faced with this task, Jonathan set about creating <a
+			href="https://github.com/18sg/Panel-O-Matic-SHET-Client">panel-o-matic</a>.
+			It consists of a custom language for specifying button behaviours and a
+			SHET client which takes button-press and mode-change events from the panel
+			and sets properties or calls actions as appropriate. Here's an example of
+			a configuration file.</p>
+			
+<pre>
+MUSIC {
+	// In music mode, pressing a button will trigger one of the following actions
+	0 =&gt; /lounge/mpd/prev;
+	1 =&gt; /lounge/mpd/next;
+	2 =&gt; /lounge/mpd/toggle;
+	3 =&gt; /lounge/amplifier/vol_dec 20;
+	4 =&gt; /lounge/amplifier/vol_inc 20;
+	
+	// Pressing the 'middle-switch' (modifier) and button 0 enables random mode
+	^0 :&gt; /lounge/mpd/random 1;
+	// Pressing and holding with the middle-switch turns random mode off.
+	_^0 :&gt; /lounge/mpd/random 0;
+	
+	// The _ indicates "holding down" a key, and the special "any(...)" syntax
+	// allows any one of the listed keys to be pressed and the associated string
+	// be passed to the action as an argument.
+	_any(0 : "james"
+	    ,1 : "jonathan"
+	    ,2 : "karl"
+	    ,3 : "matt"
+	    ,4 : "tom") =&gt; /lounge/mpd/copy_playlist_from;
+} </pre>
+			
+			<p>With the panel finished, it was time to put it to work. The first and
+			most obvious thing to do was allow control of MPD (the media player on our
+			lounge computer). Since we already had an MPD SHET client, this simply
+			required adding all the actions we wanted to the button panel
+			configuration and took all of 5 minutes!</p>
+			
+			<p>With a sensor on the washing machine and the SHET email-sending client,
+			we had been setting up reminders by using the 'bind' client to set up a
+			one-off binding that would cause the 'washing finished' notification to
+			call the 'send email' action for the appropriate person. To allow bookings
+			to be made and cancelled from the button panel, all we needed for
+			each person was a panel-o-matic configuration along the lines of:
+<pre>
+// Booking reminders with a press
+0 =&gt; /bind/once /lounge/washing_machine/finished /james/email;
+// Cancelling reminders with a press-and-hold
+_0 =&gt; /bind/rm /lounge/washing_machine/finished /james/email;
+</pre>
+			Once again, a really useful feature implemented with a minimum of effort.
+			As a finishing touch, we bound the "washing starting" event to change the
+			panel to the reminder booking mode automatically.</p>
+			
+			<div class="figure right"
+			     style="width : 250px; height : 200px; background-color : #AAA;">
+			</div>
+			<p>Another feature we wanted was to be able to browse our <a
+			href="http://recipes.18sg.net">house recipe website</a> from the panel.
+			Again, all we needed was to use the panel to trigger calls to the
+			'keybind' client on the lounge computer. As you can see from the video,
+			the panel makes a surprisingly usable interface for browsing around from
+			the other side of the kitchen.</p>
+			
+			<p>We've also got a mode for interacting with IRC enabling requests for
+			washing up and letting people know when dinner is ready.</p>
+			
+			<p>We have one other miscellaneous mode which contains useful commands for
+			interacting with the computer (such as close window). It also has a button
+			which 'powers down' the room turning off music, screens and lights and
+			turning on a light in the hallway.</p>
+			
+			<p>The individual user modes have been fairly sparsely used in practice.
+			They do however serve a few useful services. For example in Jonathan's
+			mode there is a button which turns off his lights and music while copying
+			his playlist into the lounge media player and launching the recipe
+			browser. It also serves some less useful (but obviously more important
+			services), for example, Matt's mode is an in-joke and meme sound-board.</p>
 		
 		<h2>Miscellaneous Hacks</h2>
 			<!-- TODO: Touch panel, Amp, Door handle, oven, back door, door stop -->
